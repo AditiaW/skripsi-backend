@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // Basic settings
+    "baseUrl": "src",
+    "outDir": "dist",
+    "sourceMap": true,
+
+    // Language and environment
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+
+    // Module resolution
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Strict type-checking
+    "strict": false,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Optional stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+
+
+    "typeRoots": ["./node_modules/@types", "./types"]
+  },
+  "include": ["src/**/*"]
+}
