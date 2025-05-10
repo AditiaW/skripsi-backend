@@ -23,6 +23,9 @@ model User {
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  fcmToken         String?   @unique
+  // Order Order[]
+  Order            Order[]
 }
 
 enum Role {
@@ -49,4 +52,43 @@ model Product {
   categoryId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  OrderItem OrderItem[]
+}
+
+model Order {
+  id              String        @unique
+  orderItems      OrderItem[]
+  shippingAddress String
+  shippingCity    String
+  shippingZip     String
+  shippingPhone   String
+  shippingNotes   String?
+  totalAmount     Int
+  paymentMethod   String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  snapToken       String?       @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model OrderItem {
+  id        String  @id @default(nanoid(5))
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  price     Int // Harga saat checkout (untuk keperluan historis)
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELED
 }

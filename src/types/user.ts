@@ -23,4 +23,4 @@ declare global {
  * Represents the user data included in JWT payloads.
  * Contains only the minimal necessary properties.
  */
-export type UserTokenPayload = Pick<User, 'id' | 'email' | 'role'>;
+export type UserTokenPayload = Pick<User, 'id' | 'email' | 'role' | 'name'>;
