@@ -7,7 +7,8 @@
     "dev": "nodemon ./src/index.ts",
     "seed": "ts-node prisma/seed.ts",
     "reset": "bunx prisma migrate reset",
-    "test": "mocha ./tests/**/*.test.ts"
+    "test": "mocha ./tests/**/*.test.ts",
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
