@@ -47,6 +47,59 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     }
 };
 
+// Create a new user (supports Admin role)
+export const createUserAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { name, email, password, role } = req.body;
+
+        // Validasi apakah role diberikan dengan benar
+        if (!role || !["ADMIN", "USER"].includes(role)) {
+            res.status(400).json({
+                status: false,
+                message: "Invalid role. Role must be ADMIN or USER.",
+            });
+            return;
+        }
+
+        // Cek apakah email sudah digunakan
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (existingUser) {
+            res.status(400).json({
+                status: false,
+                message: "Email already in use",
+            });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Membuat pengguna dengan peran yang ditentukan
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                role, // Menambahkan role ADMIN atau USER
+            },
+        });
+
+        // Hapus password dari respons API
+        const { password: _, ...userWithoutPassword } = user;
+
+        res.status(201).json({
+            status: true,
+            message: "User successfully created",
+            data: userWithoutPassword,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 // Get all users
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    createUserAdmin,
     deleteUser,
     getUser,
     getUsers,
@@ -14,6 +15,7 @@ const userRoute = Router();
 
 userRoute
     .get("", authMiddleware, authorizeRole(["ADMIN"]), getUsers)
+    .post("", authMiddleware, authorizeRole(["ADMIN"]), createUserAdmin)
     .get("/:userid", authMiddleware, authorizeRole(["ADMIN"]), getUser)
     .delete("/:userid", authMiddleware, authorizeRole(["ADMIN"]), deleteUser)
     .patch("/:userid", authMiddleware, authorizeRole(["ADMIN"]), validateSchema(updateUserSchema), updateUser)
