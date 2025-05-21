@@ -8,13 +8,15 @@ import {
 } from '../controllers/product.controller';
 import { productSchema, updateProductSchema } from '../schemas/product.schema';
 import validateSchema from '../middlewares/validation.middleware';
+import authMiddleware from '../middlewares/auth.middleware';
+import authorizeRole from '../middlewares/role.middleware';
 
 const router = express.Router();
 
-router.post('', validateSchema(productSchema), createProduct);
+router.post('', authMiddleware, authorizeRole(["ADMIN"]), validateSchema(productSchema), createProduct);
 router.get('', getProducts);
 router.get('/:id', getProductById);
-router.patch('/:id', validateSchema(updateProductSchema), updateProduct);
-router.delete('/:id', deleteProduct);
+router.patch('/:id', authMiddleware, authorizeRole(["ADMIN"]), validateSchema(updateProductSchema), updateProduct);
+router.delete('/:id', authMiddleware, authorizeRole(["ADMIN"]), deleteProduct);
 
 export default router;
