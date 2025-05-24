@@ -291,7 +291,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             { expiresIn: "1y" }
         );
 
-        res.json({ token, message: "Login successful" });
+        res.json({ token, role: user.role, message: "Login successful" });
     } catch (error) {
         next(error);
     }
