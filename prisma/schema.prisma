@@ -24,7 +24,6 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   fcmToken         String?   @unique
-  // Order Order[]
   Order            Order[]
 }
 
@@ -57,7 +56,7 @@ model Product {
 }
 
 model Order {
-  id              String        @unique
+  id              String        @id @unique
   orderItems      OrderItem[]
   shippingAddress String
   shippingCity    String
@@ -65,7 +64,6 @@ model Order {
   shippingPhone   String
   shippingNotes   String?
   totalAmount     Int
-  paymentMethod   String?
   paymentStatus   PaymentStatus @default(PENDING)
   snapToken       String?       @unique
   createdAt       DateTime      @default(now())
@@ -82,7 +80,7 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   productId String
   quantity  Int
-  price     Int // Harga saat checkout (untuk keperluan historis)
+  price     Int 
 }
 
 enum PaymentStatus {
