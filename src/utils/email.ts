@@ -43,8 +43,8 @@ export const sendPasswordResetEmail = async ({ email, token, name }: SendResetEm
 };
 
 export const sendVerificationEmail = async ({ email, verificationToken, name }: SendVerificationEmailParams) => {
-  const verificationUrl = `${process.env.ORIGIN}/verify-email?token=${verificationToken}`;
-
+  const verificationUrl = `${process.env.ORIGIN}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+  
   await resend.emails.send({
     from: 'GM Candra Mebel <support@backend.gmcandramebel.shop>',
     to: email,
