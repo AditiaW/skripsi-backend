@@ -182,7 +182,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
                 status: false,
                 message: "Invalid user ID",
             });
-            return; 
+            return;
         }
 
         const user = await prisma.user.findUnique({
@@ -327,7 +327,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
 
         // Check if email is verified
         if (!user.isVerified) {
-            res.status(403).json({ 
+            res.status(403).json({
                 message: "Please verify your email address before logging in.",
                 isVerified: false
             });
@@ -430,5 +430,47 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
         });
     } catch (error) {
         next(error);
+    }
+};
+
+export const resendVerificationEmail = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            res.status(400).json({ message: "Email is required" });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        if (user.isVerified) {
+            res.status(400).json({ message: "User is already verified" });
+            return;
+        }
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        await prisma.user.update({
+            where: { email },
+            data: { verificationToken, verificationTokenExpiry },
+        });
+
+        await sendVerificationEmail({ email, verificationToken, name: user.name });
+
+        res.status(200).json({ message: "Verification email has been sent" });
+        return;
+    } catch (error) {
+        console.error("Error resending verification email:", error);
+        res.status(500).json({ message: "Internal server error" });
+        return;
     }
 };
