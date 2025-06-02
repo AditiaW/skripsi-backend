@@ -24,7 +24,7 @@ export const createTransaction = async (
 
     // Validate user
     if (!userId) throw createError(401, "User not authenticated");
-    
+
     const userExists = await prisma.user.findUnique({ where: { id: userId } });
     if (!userExists) throw createError(404, "User not found");
 
@@ -135,111 +135,6 @@ export const createTransaction = async (
   }
 };
 
-export const getOrders = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.user?.id;
-    const { status, limit, page } = req.query;
-    
-    // Validate user
-    if (!userId) throw createError(401, "User not authenticated");
-
-    // Pagination settings
-    const pageNumber = parseInt(page as string) || 1;
-    const pageSize = parseInt(limit as string) || 10;
-    const skip = (pageNumber - 1) * pageSize;
-
-    // Build where clause
-    const where: any = { userId };
-    if (status) {
-      where.paymentStatus = status;
-    }
-
-    // Get orders with pagination
-    const [orders, totalOrders] = await Promise.all([
-      prisma.order.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          orderItems: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  name: true,
-                  image: true
-                }
-              }
-            }
-          }
-        }
-      }),
-      prisma.order.count({ where })
-    ]);
-
-    res.json({
-      success: true,
-      data: orders,
-      pagination: {
-        total: totalOrders,
-        page: pageNumber,
-        pageSize,
-        totalPages: Math.ceil(totalOrders / pageSize)
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getOrderById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = req.user?.id;
-    const { id } = req.params;
-
-    // Validate user
-    if (!userId) throw createError(401, "User not authenticated");
-
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: {
-        orderItems: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                name: true,
-                image: true,
-                description: true
-              }
-            }
-          }
-        }
-      }
-    });
-
-    // Check if order exists and belongs to the user
-    if (!order) throw createError(404, "Order not found");
-    if (order.userId !== userId) throw createError(403, "Unauthorized access");
-
-    res.json({
-      success: true,
-      data: order
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const handlePaymentNotification = async (
   req: Request,
   res: Response,
@@ -247,10 +142,10 @@ export const handlePaymentNotification = async (
 ) => {
   try {
     const notification = req.body;
-    const { 
-      order_id: orderId, 
-      transaction_status: transactionStatus, 
-      fraud_status: fraudStatus 
+    const {
+      order_id: orderId,
+      transaction_status: transactionStatus,
+      fraud_status: fraudStatus
     } = notification;
 
     // Map Midtrans status to PaymentStatus enum
@@ -271,6 +166,48 @@ export const handlePaymentNotification = async (
     res.status(200).send('OK');
   } catch (error) {
     console.error('Payment notification handling failed:', error);
+    next(error);
+  }
+};
+
+// Get all orders
+export const getOrders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const orders = await prisma.order.findMany();
+
+    res.json({
+      status: true,
+      message: "Orders successfully fetched",
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get all orders
+export const getOrderById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const orderId = req.params.id;
+
+        if (!orderId) {
+            res.status(400).json({
+                status: false,
+                message: "Invalid order ID",
+            });
+            return;
+        }
+
+    const orders = await prisma.order.findUnique({
+      where: {id: orderId}
+    });
+
+    res.json({
+      status: true,
+      message: "Orders successfully fetched",
+      data: orders,
+    });
+  } catch (error) {
     next(error);
   }
 };
