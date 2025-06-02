@@ -128,6 +128,7 @@ export const createUserAdmin = async (req: Request, res: Response, next: NextFun
                 name,
                 email,
                 password: hashedPassword,
+                isVerified: true,
                 role,
             },
         });
