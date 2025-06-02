@@ -56,7 +56,7 @@ model Product {
 }
 
 model Order {
-  id              String        @id @unique
+  id              String        @id
   orderItems      OrderItem[]
   shippingAddress String
   shippingCity    String
