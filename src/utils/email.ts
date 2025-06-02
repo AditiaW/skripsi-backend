@@ -11,7 +11,7 @@ export const sendPasswordResetEmail = async ({ email, token }: SendResetEmailPar
   const resetUrl = `${process.env.ORIGIN}/reset-password?token=${token}`;
   
   await resend.emails.send({
-    from: 'GM Candra Mebel <onboarding@resend.dev>',
+    from: 'GM Candra Mebel <support@backend.gmcandramebel.shop>',
     to: email,
     subject: '🔒 Reset Your Password - GM Candra Mebel',
     html: `
@@ -25,6 +25,8 @@ export const sendPasswordResetEmail = async ({ email, token }: SendResetEmailPar
         <hr style="margin: 20px 0;">
         <p style="font-size: 12px; color: #888;">If the button above doesn’t work, copy and paste this link into your browser:</p>
         <p style="word-break: break-all; font-size: 12px;">${resetUrl}</p>
+        <hr style="margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;"><strong>⚠️ This is an automated email. Please do not reply.</strong></p>
         <p style="font-size: 12px; color: #888;">© ${new Date().getFullYear()} GM Candra Mebel. All rights reserved.</p>
       </div>
     `
