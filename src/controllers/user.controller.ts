@@ -3,7 +3,7 @@ import prisma from "../lib/client";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { sendPasswordResetEmail } from '../utils/email';
+import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/email';
 
 // Create a new user
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -26,33 +26,80 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
+                verificationToken,
+                verificationTokenExpiry,
             },
         });
 
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
+        // Send verification email
+        await sendVerificationEmail({ email, name, verificationToken });
+
+        // Remove sensitive data from response
+        const { password: _, verificationToken: __, ...userWithoutSensitiveData } = user;
 
         res.status(201).json({
             status: true,
-            message: "User successfully created",
-            data: userWithoutPassword,
+            message: "User created successfully. Please check your email to verify your account.",
+            data: userWithoutSensitiveData,
         });
     } catch (error) {
         next(error);
     }
 };
 
-// Create a new user (supports Admin role)
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const { token } = req.params;
+
+        const user = await prisma.user.findFirst({
+            where: {
+                verificationToken: token,
+                verificationTokenExpiry: {
+                    gt: new Date() // Check if token hasn't expired
+                }
+            }
+        });
+
+        if (!user) {
+            res.status(400).json({
+                status: false,
+                message: "Invalid or expired verification token"
+            });
+            return;
+        }
+
+        // Update user to verified
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                isVerified: true,
+                verificationToken: null,
+                verificationTokenExpiry: null
+            }
+        });
+
+        res.status(200).json({
+            status: true,
+            message: "Email verified successfully"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Create a new user (For Admin)
 export const createUserAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Validasi apakah role diberikan dengan benar
         if (!role || !["ADMIN", "USER"].includes(role)) {
             res.status(400).json({
                 status: false,
@@ -76,13 +123,12 @@ export const createUserAdmin = async (req: Request, res: Response, next: NextFun
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Membuat pengguna dengan peran yang ditentukan
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
                 password: hashedPassword,
-                role, // Menambahkan role ADMIN atau USER
+                role,
             },
         });
 
@@ -136,7 +182,7 @@ export const getUser = async (req: Request, res: Response, next: NextFunction): 
                 status: false,
                 message: "Invalid user ID",
             });
-            return; // Add return to prevent further execution
+            return; 
         }
 
         const user = await prisma.user.findUnique({
@@ -279,6 +325,15 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             return;
         }
 
+        // Check if email is verified
+        if (!user.isVerified) {
+            res.status(403).json({ 
+                message: "Please verify your email address before logging in.",
+                isVerified: false
+            });
+            return;
+        }
+
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             res.status(401).json({ message: "Invalid email or password." });
@@ -291,7 +346,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
             { expiresIn: "1y" }
         );
 
-        res.json({ token, role: user.role, message: "Login successful" });
+        res.json({ token, message: "Login successful" });
     } catch (error) {
         next(error);
     }
@@ -304,20 +359,28 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
-            res.status(200).json({ status: true, message: 'If the email exists, a reset link will be sent' });
+            res.status(200).json({ status: true, message: 'If the email exists and is verified, a reset link will be sent' });
+            return;
+        }
+
+        if (!user.isVerified) {
+            res.status(403).json({
+                status: false,
+                message: 'Please verify your email address before resetting password'
+            });
             return;
         }
 
         // Generate reset token
         const resetToken = crypto.randomBytes(20).toString('hex');
-        const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+        const resetTokenExpiry = new Date(Date.now() + 3600000);
 
         await prisma.user.update({
             where: { email },
             data: { resetToken, resetTokenExpiry }
         });
 
-        await sendPasswordResetEmail({ email, token: resetToken });
+        await sendPasswordResetEmail({ email, name: user.name, token: resetToken });
 
         res.json({
             status: true,

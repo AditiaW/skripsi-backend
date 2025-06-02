@@ -14,17 +14,20 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  name             String
-  email            String    @unique
-  password         String
-  role             Role      @default(USER)
-  resetToken       String?   @unique
-  resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  fcmToken         String?   @unique
-  Order            Order[]
+  id                      String    @id @default(uuid())
+  name                    String
+  email                   String    @unique
+  password                String
+  role                    Role      @default(USER)
+  isVerified              Boolean   @default(false)
+  verificationToken       String?   @unique
+  verificationTokenExpiry DateTime?
+  resetToken              String?   @unique
+  resetTokenExpiry        DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  fcmToken                String?   @unique
+  Order                   Order[]
 }
 
 enum Role {
@@ -80,7 +83,7 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   productId String
   quantity  Int
-  price     Int 
+  price     Int
 }
 
 enum PaymentStatus {
