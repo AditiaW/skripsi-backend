@@ -154,7 +154,6 @@ export const createUserAdmin = async (req: Request, res: Response, next: NextFun
     }
 };
 
-
 // Get all users
 export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -481,5 +480,31 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
         console.error("Error resending verification email:", error);
         res.status(500).json({ message: "Internal server error" });
         return;
+    }
+};
+
+export const checkVerificationStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email } = req.query;
+
+        if (!email || typeof email !== 'string') {
+            res.status(400).json({ message: "Email is required" });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email },
+            select: { isVerified: true }
+        });
+
+        if (!user) {
+            res.status(404).json({ message: "User not found" });
+            return;
+        }
+
+        res.status(200).json({ isVerified: user.isVerified });
+    } catch (error) {
+        console.error("Error checking verification status:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

@@ -6,6 +6,7 @@ import {
   createUser,
   verifyEmail,
   resendVerificationEmail,
+  checkVerificationStatus,
 } from "../controllers/user.controller";
 import validateSchema from "../middlewares/validation.middleware";
 import { createUserSchema } from "../schemas/user.schema";
@@ -48,6 +49,7 @@ router.get("/", (_req, res) => {
 
 router.post("/register", validateSchema(createUserSchema), createUser);
 router.get('/verify-email/:token', verifyEmail);
+router.get('/check-verification-status/:email', checkVerificationStatus);
 router.post("/resend-verification", resendLimiter, resendVerificationEmail);
 router.post("/login", authLimiter, loginUser);
 router.post("/forgot-password", resetLimiter, forgotPassword);
