@@ -55,7 +55,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const verifyEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     try {
         const { token } = req.params;
 
@@ -63,20 +63,20 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
             where: {
                 verificationToken: token,
                 verificationTokenExpiry: {
-                    gt: new Date() // Check if token hasn't expired
+                    gt: new Date()
                 }
             }
         });
 
         if (!user) {
             res.status(400).json({
-                status: false,
-                message: "Invalid or expired verification token"
+                success: false,
+                error: "invalid_or_expired_token",
+                message: "This verification link has expired or is invalid. Please request a new verification email."
             });
             return;
         }
 
-        // Update user to verified
         await prisma.user.update({
             where: { id: user.id },
             data: {
@@ -87,12 +87,19 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
         });
 
         res.status(200).json({
-            status: true,
             success: true,
-            message: "Email verified successfully"
+            message: "Email verified successfully! You can now sign in."
         });
+        return;
     } catch (error) {
-        next(error);
+        console.error("Email verification API error:", error);
+
+        res.status(500).json({
+            success: false,
+            error: "server_error",
+            message: "An internal server error occurred. Please try again later."
+        });
+        return;
     }
 };
 
