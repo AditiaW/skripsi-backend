@@ -88,6 +88,7 @@ export const verifyEmail = async (req: Request, res: Response, next: NextFunctio
 
         res.status(200).json({
             status: true,
+            success: true,
             message: "Email verified successfully"
         });
     } catch (error) {
@@ -467,7 +468,7 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
 
         await sendVerificationEmail({ email, verificationToken, name: user.name });
 
-        res.status(200).json({ message: "Verification email has been sent" });
+        res.status(200).json({ success: true, message: "Verification email has been sent" });
         return;
     } catch (error) {
         console.error("Error resending verification email:", error);
