@@ -485,26 +485,45 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
 
 export const checkVerificationStatus = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email } = req.query;
+        const email = req.query.email as string;
 
-        if (!email || typeof email !== 'string') {
-            res.status(400).json({ message: "Email is required" });
+        if (!email) {
+            res.status(400).json({
+                success: false,
+                error: "email_required",
+                message: "Email is required"
+            });
             return;
         }
 
         const user = await prisma.user.findUnique({
             where: { email },
-            select: { isVerified: true }
+            select: {
+                isVerified: true,
+                name: true
+            }
         });
 
         if (!user) {
-            res.status(404).json({ message: "User not found" });
+            res.status(404).json({
+                success: false,
+                error: "user_not_found",
+                message: "User not found. Please register first."
+            });
             return;
         }
 
-        res.status(200).json({ isVerified: user.isVerified });
+        res.status(200).json({
+            success: true,
+            isVerified: user.isVerified,
+            name: user.name
+        });
     } catch (error) {
         console.error("Error checking verification status:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            error: "server_error",
+            message: "Internal server error"
+        });
     }
 };
