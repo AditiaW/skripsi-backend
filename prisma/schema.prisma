@@ -59,18 +59,21 @@ model Product {
 }
 
 model Order {
-  id              String        @id
-  orderItems      OrderItem[]
-  shippingAddress String
-  shippingCity    String
-  shippingZip     String
-  shippingPhone   String
-  shippingNotes   String?
-  totalAmount     Int
-  paymentStatus   PaymentStatus @default(PENDING)
-  snapToken       String?       @unique
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                String        @id
+  orderItems        OrderItem[]
+  shippingFirstName String
+  shippingLastName  String
+  shippingEmail     String
+  shippingAddress   String
+  shippingCity      String
+  shippingZip       String
+  shippingPhone     String
+  shippingNotes     String?
+  totalAmount       Int
+  paymentStatus     PaymentStatus @default(PENDING)
+  snapToken         String?       @unique
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   user   User   @relation(fields: [userId], references: [id])
   userId String

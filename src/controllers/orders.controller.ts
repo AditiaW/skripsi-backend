@@ -93,6 +93,9 @@ export const createTransaction = async (
         data: {
           id: orderId,
           userId,
+          shippingFirstName: customerDetails.first_name,
+          shippingLastName: customerDetails.last_name,
+          shippingEmail: customerDetails.email,
           shippingAddress: customerDetails.address,
           shippingCity: customerDetails.city,
           shippingZip: customerDetails.zip,
@@ -110,16 +113,6 @@ export const createTransaction = async (
           },
         },
       });
-
-      // Update product quantities
-      await Promise.all(
-        validatedItems.map(item =>
-          prisma.product.update({
-            where: { id: item.id },
-            data: { quantity: { decrement: item.quantity } },
-          })
-        )
-      );
 
       return order;
     });
@@ -155,8 +148,19 @@ export const handlePaymentNotification = async (
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: { paymentStatus, updatedAt: new Date() },
-      include: { user: true },
+      include: { user: true, orderItems: true },
     });
+
+    if (paymentStatus === "PAID") {
+      await Promise.all(
+        updatedOrder.orderItems.map(item =>
+          prisma.product.update({
+            where: { id: item.productId },
+            data: { quantity: { decrement: item.quantity } },
+          })
+        )
+      );
+    }
 
     // Send notification if payment succeeded
     if (paymentStatus === 'PAID' && updatedOrder.user?.fcmToken) {
