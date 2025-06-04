@@ -175,8 +175,8 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
   try {
     const orders = await prisma.order.findMany({
       include: {
-        orderItems: true, 
-        user: true, 
+        orderItems: true,
+        user: true,
       },
     });
 
@@ -195,22 +195,34 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
   try {
     const orderId = req.params.id;
 
-        if (!orderId) {
-            res.status(400).json({
-                status: false,
-                message: "Invalid order ID",
-            });
-            return;
-        }
+    if (!orderId) {
+      res.status(400).json({
+        status: false,
+        message: "Invalid order ID",
+      });
+      return;
+    }
 
-    const orders = await prisma.order.findUnique({
-      where: {id: orderId}
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderItems: true,
+        user: true,
+      },
     });
+
+    if (!order) {
+      res.status(404).json({
+        status: false,
+        message: "Order not found",
+      });
+      return;
+    }
 
     res.json({
       status: true,
-      message: "Orders successfully fetched",
-      data: orders,
+      message: "Order successfully fetched",
+      data: order,
     });
   } catch (error) {
     next(error);
