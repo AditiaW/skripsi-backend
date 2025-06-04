@@ -176,7 +176,6 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
     const orders = await prisma.order.findMany({
       include: {
         orderItems: true,
-        user: true,
       },
     });
 
@@ -207,7 +206,6 @@ export const getOrderById = async (req: Request, res: Response, next: NextFuncti
       where: { id: orderId },
       include: {
         orderItems: true,
-        user: true,
       },
     });
 
