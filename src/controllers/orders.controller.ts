@@ -93,8 +93,8 @@ export const createTransaction = async (
         data: {
           id: orderId,
           userId,
-          shippingFirstName: customerDetails.first_name,
-          shippingLastName: customerDetails.last_name,
+          shippingFirstName: customerDetails.firstName,
+          shippingLastName: customerDetails.lastName,
           shippingEmail: customerDetails.email,
           shippingAddress: customerDetails.address,
           shippingCity: customerDetails.city,
