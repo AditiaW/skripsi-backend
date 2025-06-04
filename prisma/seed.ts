@@ -13,6 +13,7 @@ async function main() {
         create: {
             name: 'aditia.winanda15072002@gmail.com',
             email: 'aditia.winanda15072002@gmail.com',
+            isVerified: true,
             password: hashedPassword,
             role: 'ADMIN',
         },
