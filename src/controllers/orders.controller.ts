@@ -173,7 +173,12 @@ export const handlePaymentNotification = async (
 // Get all orders
 export const getOrders = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const orders = await prisma.order.findMany();
+    const orders = await prisma.order.findMany({
+      include: {
+        orderItems: true, 
+        user: true, 
+      },
+    });
 
     res.json({
       status: true,
@@ -185,7 +190,7 @@ export const getOrders = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-// Get all orders
+// Get order
 export const getOrderById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const orderId = req.params.id;
