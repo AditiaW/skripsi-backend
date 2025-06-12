@@ -5,17 +5,14 @@ import authorizeRole from "../middlewares/role.middleware";
 
 const router = express.Router();
 
-// Create new order transaction
 router.post(
   "/create-transaction",
   authMiddleware,
   OrderController.createTransaction
 );
 
-// Payment notification handler (no auth needed as it's called by Midtrans)
 router.post('/payments/notification', OrderController.handlePaymentNotification);
 
-// Get user's orders
 router.get(
   "/",
   authMiddleware,
@@ -23,7 +20,6 @@ router.get(
   OrderController.getOrders
 );
 
-// Get specific order details
 router.get(
   "/:id",
   authMiddleware,

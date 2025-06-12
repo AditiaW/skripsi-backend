@@ -2,7 +2,7 @@
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'EXPIRED', 'CANCELED');
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -18,7 +18,6 @@ CREATE TABLE "User" (
     "resetTokenExpiry" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "fcmToken" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -88,9 +87,6 @@ CREATE UNIQUE INDEX "User_verificationToken_key" ON "User"("verificationToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_resetToken_key" ON "User"("resetToken");
-
--- CreateIndex
-CREATE UNIQUE INDEX "User_fcmToken_key" ON "User"("fcmToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Order_snapToken_key" ON "Order"("snapToken");

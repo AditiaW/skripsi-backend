@@ -3,14 +3,16 @@ import { z } from "zod";
 // Schema for creating a user
 export const createUserSchema = z.object({
     name: z.string()
-        .min(2, { message: "Name must be at least 2 characters long" })
-        .max(60, { message: "Name cannot exceed 60 characters" }),
+        .min(2, { message: "Nama harus terdiri dari minimal 2 karakter." })
+        .max(60, { message: "Nama tidak boleh lebih dari 60 karakter." }),
     email: z.string()
-        .email({ message: "Invalid email address format" }),
+        .email({ message: "Format alamat email tidak valid." }),
     password: z.string()
-        .min(5, { message: "Password must be at least 5 characters long" }),
-    role: z.enum(["ADMIN", "USER"], { message: "Role must be either ADMIN or USER" }).optional()
-}).strict(); 
+        .min(5, { message: "Kata sandi harus terdiri dari minimal 5 karakter." }),
+    role: z.enum(["ADMIN", "USER"], {
+        message: "Peran harus bernilai ADMIN atau USER.",
+    }).optional(),
+}).strict();
 
 // Schema for updating a user, all fields optional
 export const updateUserSchema = createUserSchema.partial(); 

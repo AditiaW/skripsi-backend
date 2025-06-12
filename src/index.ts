@@ -14,19 +14,12 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 
-const allowedOrigins = process.env.ORIGIN.split(",").map(origin => origin.trim());
+const allowedOrigins = process.env.ORIGIN;
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
 }));
-
 
 app.use(compression())
 app.use(cookieParser())

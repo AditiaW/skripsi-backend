@@ -35,7 +35,6 @@ const seedUsers = async () => {
                 isVerified: faker.datatype.boolean(),
                 password: hashedPassword,
                 role: faker.helpers.arrayElement(['ADMIN', 'USER']),
-                fcmToken: faker.datatype.boolean() ? faker.string.uuid() : null,
             },
         });
     }
@@ -43,7 +42,7 @@ const seedUsers = async () => {
 };
 
 const seedCategories = async () => {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
         await prisma.category.create({
             data: { id: nanoid(), name: faker.commerce.department() },
         });
@@ -62,7 +61,7 @@ const seedProducts = async () => {
                 description: faker.commerce.productDescription(),
                 price: parseInt(faker.commerce.price({ min: 500000, max: 5000000 })),
                 quantity: faker.number.int({ min: 5, max: 50 }),
-                image: faker.image.url(),
+                image: "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
                 categoryId: categories[i % categories.length].id,
             },
         });
@@ -88,7 +87,7 @@ const seedOrders = async () => {
                 shippingPhone: faker.phone.number(),
                 shippingNotes: faker.lorem.sentence(),
                 totalAmount: faker.number.int({ min: 500000, max: 10000000 }),
-                paymentStatus: faker.helpers.arrayElement(["PENDING", "PAID", "FAILED", "EXPIRED", "CANCELED"]),
+                paymentStatus: faker.helpers.arrayElement(["PENDING", "PAID", "FAILED"]),
                 snapToken: faker.datatype.boolean() ? faker.string.uuid() : null,
             },
         });
