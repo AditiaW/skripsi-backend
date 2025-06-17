@@ -5,6 +5,7 @@ import prisma from "../lib/client";
 import midtransClient from "midtrans-client";
 import { handlePrismaError } from "../utils/errorPrismaHandler";
 import { getPaymentStatus } from "../utils/getPaymentStatus";
+import { sendNotificationToAdmins, sendPaymentNotification } from "../utils/sendNotification";
 
 // Midtrans configuration
 const snap = new midtransClient.Snap({
@@ -116,6 +117,8 @@ export const createTransaction = async (
       return order;
     });
 
+    await sendNotificationToAdmins(orderId);
+
     res.json({
       orderId: order.id,
       token: transaction.token,
@@ -163,6 +166,8 @@ export const handlePaymentNotification = async (
         )
       );
     }
+
+    await sendPaymentNotification(orderId);
 
     res.status(200).send('OK');
   } catch (error) {

@@ -281,7 +281,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
 // Login user
 export const loginUser = async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
+    const { email, password, fcmToken } = req.body;
     if (!email || !password) {
         res.status(400).json({ message: "Email dan password diperlukan." });
         return;
@@ -306,6 +306,10 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             res.status(401).json({ message: "Invalid email atau password." });
             return;
         }
+        await prisma.user.update({
+            where: { email },
+            data: { fcmToken }, 
+        });
         const token = jwt.sign(
             { id: user.id, name: user.name, email: user.email, role: user.role },
             process.env.JWT_SECRET!,

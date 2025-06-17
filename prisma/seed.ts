@@ -8,14 +8,14 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 5);
 
 // Seed Admin
 const seedAdminUser = async () => {
-    const hashedPasswordAdmin = await bcrypt.hash('aditia.winanda15072002@gmail.com', 10);
+    const hashedPasswordAdmin = await bcrypt.hash('aditiaw1507@gmail.com', 10);
 
     const adminUser = await prisma.user.upsert({
-        where: { email: 'aditia.winanda15072002@gmail.com' },
+        where: { email: 'aditiaw1507@gmail.com' },
         update: {},
         create: {
-            name: 'aditia.winanda15072002@gmail.com',
-            email: 'aditia.winanda15072002@gmail.com',
+            name: 'aditiaw1507@gmail.com',
+            email: 'aditiaw1507@gmail.com',
             isVerified: true,
             password: hashedPasswordAdmin,
             role: 'ADMIN',
