@@ -16,7 +16,7 @@ interface SendVerificationEmailParams extends EmailParams {
 }
 
 export const sendPasswordResetEmail = async ({ email, token, name }: SendResetEmailParams) => {
-  const resetUrl = `${process.env.ORIGIN}/reset-password?token=${token}`;
+  const resetUrl = `${process.env.EMAIL_ORIGIN}/reset-password?token=${token}`;
 
   await resend.emails.send({
     from: 'GM Candra Mebel <support@backend.gmcandramebel.shop>',
@@ -43,7 +43,7 @@ export const sendPasswordResetEmail = async ({ email, token, name }: SendResetEm
 };
 
 export const sendVerificationEmail = async ({ email, verificationToken, name }: SendVerificationEmailParams) => {
-  const verificationUrl = `${process.env.ORIGIN}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+  const verificationUrl = `${process.env.EMAIL_ORIGIN}/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
   
   await resend.emails.send({
     from: 'GM Candra Mebel <support@backend.gmcandramebel.shop>',

@@ -27,4 +27,11 @@ router.get(
   OrderController.getOrderById
 );
 
+router.delete(
+  "/:id",
+  authMiddleware,
+  authorizeRole(["ADMIN"]),
+  OrderController.deleteOrder
+);
+
 export default router;

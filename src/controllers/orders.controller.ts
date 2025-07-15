@@ -249,3 +249,47 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
     }
   }
 };
+
+// Delete order by ID
+export const deleteOrder = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orderId = req.params.id;
+
+    if (!orderId) {
+      res.status(400).json({ status: false, message: "Order ID diperlukan" });
+      return;
+    }
+
+    const existingOrder = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { orderItems: true },
+    });
+
+    if (!existingOrder) {
+      res.status(404).json({ status: false, message: "Order tidak ditemukan" });
+      return;
+    }
+
+    await prisma.$transaction(async (prisma) => {
+      await prisma.orderItem.deleteMany({
+        where: { orderId },
+      });
+      await prisma.order.delete({
+        where: { id: orderId },
+      });
+    });
+
+    res.status(200).json({
+      status: true,
+      message: "Order berhasil dihapus",
+    });
+
+  } catch (error) {
+    console.error("Delete order error:", error);
+    if (error instanceof Error) {
+      handlePrismaError(error, res);
+    } else {
+      res.status(500).json({ success: false, error: "Terjadi kesalahan tak dikenal" });
+    }
+  }
+};
