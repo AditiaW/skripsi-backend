@@ -8,6 +8,7 @@ const router = express.Router();
 router.post(
   "/create-transaction",
   authMiddleware,
+  authorizeRole(["USER"]),
   OrderController.createTransaction
 );
 
